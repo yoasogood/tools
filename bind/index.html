@@ -26,7 +26,7 @@
   button:disabled{opacity:.5}
   .msg{min-height:1.6em;margin:12px 0 0;font-size:14px;text-align:center;color:var(--red)}
   .done{text-align:center}
-  .done .big{font-size:44px;margin:4px 0}
+  .done .wolf{display:block;width:96px;margin:6px auto 4px}
   .done p{color:var(--grey)}
   .done button{background:var(--olive);margin-top:18px}
   .status{text-align:center;color:var(--grey)}
@@ -38,7 +38,7 @@
   <div class="card">
     <img class="logo" src="../assets/logo.png" alt="庄稼狼">
     <h1>LINE 會員綁定</h1>
-    <p class="lead">填上你訂購時用的電話，之後的老客優惠、早鳥通知和退差價，都會直接傳到這個 LINE，不用再自己找連結。</p>
+    <p class="lead">填上您官網訂購時的電話，之後的老狼客優惠、早鳥通知，都會優先傳到您的Line，不用再找連結囉！</p>
 
     <p id="status" class="status">載入中…</p>
 
@@ -58,10 +58,9 @@
     </form>
 
     <div id="done" class="done" hidden>
-      <div class="big">🐺</div>
+      <img class="wolf" src="../assets/wolf.png" alt="庄稼狼">
       <h1>綁定完成</h1>
-      <p>謝謝你！之後的老客優惠和早鳥通知，會直接傳到這個 LINE。</p>
-      <button id="close" type="button">回到聊天室</button>
+      <button id="close" type="button">回到對話</button>
     </div>
   </div>
   <footer>庄稼狼農產｜台南麻豆</footer>
