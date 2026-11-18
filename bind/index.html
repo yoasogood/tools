@@ -29,6 +29,8 @@
   .done .wolf{display:block;width:104px;margin:28px auto 22px}
   .done p{color:var(--grey)}
   .done button{background:var(--olive);margin-top:44px}
+  .done .note{font-size:14px;color:var(--grey);margin:6px 0 0;min-height:1.4em}
+  .rebind{display:inline-block;margin-top:16px;font-size:13px;color:var(--grey);text-decoration:underline}
   .status{text-align:center;color:var(--grey)}
   footer{text-align:center;font-size:12px;color:#9A8E98;margin-top:12px}
 </style>
@@ -51,7 +53,7 @@
       </label>
       <label class="chk">
         <input id="agree" type="checkbox">
-        <span>我同意庄稼狼用這支電話對照我的訂購紀錄、傳送優惠與出貨通知，不做其他用途。</span>
+        <span>我同意庄稼狼用這支電話對照我的訂購紀錄，並透過 LINE 傳送優惠與活動通知，不做其他用途。</span>
       </label>
       <button id="submit" type="submit">送出綁定</button>
       <p id="msg" class="msg" role="status"></p>
@@ -60,7 +62,9 @@
     <div id="done" class="done" hidden>
       <img class="wolf" src="../assets/wolf.png" alt="庄稼狼">
       <h1>狼客綁定完成</h1>
+      <p id="doneNote" class="note"></p>
       <button id="close" type="button">回到對話</button>
+      <a id="rebind" class="rebind" href="#" hidden>電話換了？重新綁定</a>
     </div>
   </div>
   <footer>庄稼狼農產｜台南麻豆</footer>
@@ -74,53 +78,73 @@
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
   const source = (params.get("src") || "direct").replace(/[^\w-]/g, "").slice(0, 30);
-  const preview = params.get("preview") === "1";
+  const preview = params.get("preview") === "1" || params.get("preview") === "done";
 
   const normPhone = (v) => v.replace(/[^\d]/g, "");
   const validPhone = (p) => /^09\d{8}$/.test(p) || /^0[2-8]\d{7,8}$/.test(p);
   const say = (t) => { $("msg").textContent = t; };
 
+  function showForm() {
+    $("status").hidden = true; $("done").hidden = true; $("form").hidden = false;
+  }
+  function showDone(last4, already) {
+    $("status").hidden = true; $("form").hidden = true; $("done").hidden = false;
+    $("doneNote").textContent = last4 ? (already ? "已綁定電話末四碼 " : "綁定電話末四碼 ") + last4 : "";
+    $("rebind").hidden = !already;
+  }
+  async function api(payload) {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+    return res.json();
+  }
+
   async function start() {
-    if (preview) { $("status").hidden = true; $("form").hidden = false; return; }
+    if (preview) { params.get("preview") === "done" ? showDone("5678", true) : showForm(); return; }
     try {
       await liff.init({ liffId: LIFF_ID });
       if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
-      $("status").hidden = true;
-      $("form").hidden = false;
     } catch (e) {
       $("status").textContent = "頁面載入失敗，請從庄稼狼的 LINE 官方帳號重新開啟。";
+      return;
     }
+    // 已經綁定過的客人，直接顯示完成畫面
+    try {
+      const r = await api({ action: "check", idToken: liff.getIDToken() });
+      if (r.ok && r.bound) { showDone(r.last4, true); return; }
+    } catch (e) {}
+    showForm();
   }
+
+  $("rebind").addEventListener("click", (ev) => { ev.preventDefault(); showForm(); });
 
   $("form").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const phone = normPhone($("phone").value);
     if (!validPhone(phone)) { say("電話格式好像不對，請再確認一次（例如 0912345678）"); return; }
     if (!$("agree").checked) { say("請先勾選同意，才能完成綁定"); return; }
-    if (preview) { $("form").hidden = true; $("done").hidden = false; return; }
+    if (preview) { showDone(phone.slice(-4), false); return; }
 
     $("submit").disabled = true;
     say("送出中…");
     try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          idToken: liff.getIDToken(),
-          phone,
-          name: $("name").value.trim().slice(0, 20),
-          source
-        })
+      const data = await api({
+        idToken: liff.getIDToken(),
+        phone,
+        name: $("name").value.trim().slice(0, 20),
+        source
       });
-      const data = await res.json();
       if (!data.ok) throw new Error(data.error || "failed");
 
       // 在聊天室留下一句紀錄，方便一對一聊天時辨識客人
       if (liff.isInClient()) {
         try { await liff.sendMessages([{ type: "text", text: "會員綁定完成（末四碼 " + phone.slice(-4) + "）" }]); } catch (e) {}
       }
-      $("form").hidden = true;
-      $("done").hidden = false;
+      $("submit").disabled = false;
+      say("");
+      showDone(phone.slice(-4), false);
     } catch (e) {
       say("送出失敗，請稍後再試，或直接在聊天室留言給我們。");
       $("submit").disabled = false;
