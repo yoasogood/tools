@@ -10,8 +10,8 @@
   :root{--purple:#413140;--gold:#B0814A;--olive:#6B7A3A;--cream:#F6F0E2;--paper:#FFFDF8;--grey:#6E6270;--red:#B23A2E}
   *{box-sizing:border-box}
   body{margin:0;background:var(--cream);color:var(--purple);font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;line-height:1.7}
-  main{max-width:460px;margin:0 auto;padding:28px 18px 40px}
-  .card{background:var(--paper);border-radius:14px;padding:26px 22px;box-shadow:0 2px 10px rgba(65,49,64,.08)}
+  main{max-width:460px;margin:0 auto;padding:18px 16px 12px;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+  .card{flex:1;display:flex;flex-direction:column;background:var(--paper);border-radius:14px;padding:28px 22px;box-shadow:0 2px 10px rgba(65,49,64,.08)}
   .logo{display:block;width:180px;margin:0 auto 14px}
   h1{font-size:22px;text-align:center;margin:0 0 8px;letter-spacing:2px}
   .lead{font-size:15px;color:var(--grey);margin:0 0 20px}
@@ -25,12 +25,12 @@
   button{display:block;width:100%;padding:14px;font-size:17px;font-weight:bold;color:#fff;background:var(--purple);border:0;border-radius:28px;cursor:pointer}
   button:disabled{opacity:.5}
   .msg{min-height:1.6em;margin:12px 0 0;font-size:14px;text-align:center;color:var(--red)}
-  .done{text-align:center}
-  .done .wolf{display:block;width:96px;margin:6px auto 4px}
+  .done{text-align:center;margin:auto 0;padding:8px 0 16px}
+  .done .wolf{display:block;width:104px;margin:28px auto 22px}
   .done p{color:var(--grey)}
-  .done button{background:var(--olive);margin-top:18px}
+  .done button{background:var(--olive);margin-top:44px}
   .status{text-align:center;color:var(--grey)}
-  footer{text-align:center;font-size:12px;color:#9A8E98;margin-top:18px}
+  footer{text-align:center;font-size:12px;color:#9A8E98;margin-top:12px}
 </style>
 </head>
 <body>
@@ -59,7 +59,7 @@
 
     <div id="done" class="done" hidden>
       <img class="wolf" src="../assets/wolf.png" alt="庄稼狼">
-      <h1>綁定完成</h1>
+      <h1>狼客綁定完成</h1>
       <button id="close" type="button">回到對話</button>
     </div>
   </div>
